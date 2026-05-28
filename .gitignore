@@ -42,3 +42,6 @@ next-env.d.ts
 
 # sqlite database
 /data/
+
+# custom background image (drop your own into public/bg-knight.png)
+/public/bg-knight.png
