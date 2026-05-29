@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import TransactionFeed from "./TransactionFeed";
 import SettingsPanel from "./SettingsPanel";
+import WalletPortfolioModal from "./WalletPortfolioModal";
 import type { StoredTransaction } from "@/lib/helius/types";
 
 type Action = StoredTransaction["action"];
@@ -18,6 +19,7 @@ export default function TrackerApp({ initialTxs, walletNames, walletCount }: Pro
   const [activeFilters, setActiveFilters] = useState<Set<Action>>(
     new Set(["BUY", "SELL", "SEND", "RECEIVE"])
   );
+  const [selectedWallet, setSelectedWallet] = useState<{ address: string; name: string } | null>(null);
 
   function toggleFilter(action: Action) {
     setActiveFilters((prev) => {
@@ -47,7 +49,18 @@ export default function TrackerApp({ initialTxs, walletNames, walletCount }: Pro
           <SettingsPanel activeFilters={activeFilters} onToggleFilter={toggleFilter} />
         </div>
       </div>
-      <TransactionFeed initialTxs={initialTxs} activeFilters={activeFilters} />
+      <TransactionFeed
+        initialTxs={initialTxs}
+        activeFilters={activeFilters}
+        onWalletClick={(address, name) => setSelectedWallet({ address, name })}
+      />
+      {selectedWallet && (
+        <WalletPortfolioModal
+          address={selectedWallet.address}
+          name={selectedWallet.name}
+          onClose={() => setSelectedWallet(null)}
+        />
+      )}
     </>
   );
 }

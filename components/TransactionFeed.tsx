@@ -9,9 +9,10 @@ type Action = StoredTransaction["action"];
 interface Props {
   initialTxs: StoredTransaction[];
   activeFilters: Set<Action>;
+  onWalletClick?: (address: string, name: string) => void;
 }
 
-export default function TransactionFeed({ initialTxs, activeFilters }: Props) {
+export default function TransactionFeed({ initialTxs, activeFilters, onWalletClick }: Props) {
   const [txs, setTxs] = useState<StoredTransaction[]>(initialTxs);
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function TransactionFeed({ initialTxs, activeFilters }: Props) {
       ) : (
         <div>
           {visible.map((tx) => (
-            <TransactionCard key={tx.signature} tx={tx} />
+            <TransactionCard key={tx.signature} tx={tx} onWalletClick={onWalletClick} />
           ))}
         </div>
       )}

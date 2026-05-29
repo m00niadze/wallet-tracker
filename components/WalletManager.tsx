@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import WalletPortfolioModal from "./WalletPortfolioModal";
 
 const EMOJI_SECTIONS = [
   {
@@ -105,6 +106,9 @@ export default function WalletManager({ initial }: Props) {
 
   // Which panel is showing emojis on the right
   const [emojiPanelFor, setEmojiPanelFor] = useState<EmojiPanelFor>(null);
+
+  // Portfolio modal
+  const [portfolioWallet, setPortfolioWallet] = useState<{ address: string; name: string } | null>(null);
 
   function toggleEmojiPanel(for_: EmojiPanelFor) {
     setEmojiPanelFor((prev) => (prev === for_ ? null : for_));
@@ -346,6 +350,13 @@ export default function WalletManager({ initial }: Props) {
                       </div>
                       <div className="flex items-center gap-1 ml-3 shrink-0">
                         <button
+                          onClick={() => setPortfolioWallet({ address: w.address, name: w.name })}
+                          className="text-slate-600 hover:text-emerald-400 text-sm transition-colors p-1.5"
+                          title="View portfolio"
+                        >
+                          📊
+                        </button>
+                        <button
                           onClick={() => startEdit(w)}
                           className="text-slate-600 hover:text-slate-300 text-sm transition-colors p-1.5"
                           title="Edit wallet"
@@ -393,6 +404,14 @@ export default function WalletManager({ initial }: Props) {
           to   { opacity: 1; transform: translateX(0) scale(1); }
         }
       `}</style>
+
+      {portfolioWallet && (
+        <WalletPortfolioModal
+          address={portfolioWallet.address}
+          name={portfolioWallet.name}
+          onClose={() => setPortfolioWallet(null)}
+        />
+      )}
     </div>
   );
 }

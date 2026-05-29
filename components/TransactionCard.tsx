@@ -48,9 +48,10 @@ const ACTION_BADGE: Record<StoredTransaction["action"], string> = {
 
 interface Props {
   tx: StoredTransaction;
+  onWalletClick?: (address: string, name: string) => void;
 }
 
-export default function TransactionCard({ tx }: Props) {
+export default function TransactionCard({ tx, onWalletClick }: Props) {
   const borderClass = ACTION_STYLES[tx.action];
   const badgeClass = ACTION_BADGE[tx.action];
   const tokenLabel = tx.tokenSymbol ? `$${tx.tokenSymbol}` : tx.tokenMint.slice(0, 8) + "...";
@@ -72,7 +73,16 @@ export default function TransactionCard({ tx }: Props) {
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeClass}`}>
             {tx.action}
           </span>
-          <span className="text-sm font-semibold text-white">{tx.walletName}</span>
+          {onWalletClick ? (
+            <button
+              onClick={() => onWalletClick(tx.walletAddress, tx.walletName)}
+              className="text-sm font-semibold text-white hover:text-emerald-300 transition-colors underline-offset-2 hover:underline"
+            >
+              {tx.walletName}
+            </button>
+          ) : (
+            <span className="text-sm font-semibold text-white">{tx.walletName}</span>
+          )}
           {tx.txType === "SWAP" && (
             <span className="text-xs text-slate-500 bg-slate-800 px-1.5 py-0.5 rounded">
               {tx.dexSource}
