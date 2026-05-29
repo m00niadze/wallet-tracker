@@ -110,6 +110,28 @@ export default function WalletManager({ initial }: Props) {
   // Portfolio modal
   const [portfolioWallet, setPortfolioWallet] = useState<{ address: string; name: string } | null>(null);
 
+  // Backfill
+  const [backfillingAddress, setBackfillingAddress] = useState<string | null>(null);
+  const [backfillDone, setBackfillDone] = useState<string | null>(null);
+
+  async function backfillWallet(addr: string) {
+    setBackfillingAddress(addr);
+    setBackfillDone(null);
+    try {
+      await fetch("/api/wallets/backfill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: addr }),
+      });
+      setBackfillDone(addr);
+      setTimeout(() => setBackfillDone(null), 3000);
+    } catch {
+      // silently fail
+    } finally {
+      setBackfillingAddress(null);
+    }
+  }
+
   function toggleEmojiPanel(for_: EmojiPanelFor) {
     setEmojiPanelFor((prev) => (prev === for_ ? null : for_));
   }
@@ -355,6 +377,14 @@ export default function WalletManager({ initial }: Props) {
                           title="View portfolio"
                         >
                           📊
+                        </button>
+                        <button
+                          onClick={() => backfillWallet(w.address)}
+                          disabled={backfillingAddress === w.address}
+                          className="text-slate-600 hover:text-blue-400 disabled:opacity-40 text-sm transition-colors p-1.5"
+                          title="Re-sync transaction history"
+                        >
+                          {backfillingAddress === w.address ? "⏳" : backfillDone === w.address ? "✓" : "🔄"}
                         </button>
                         <button
                           onClick={() => startEdit(w)}

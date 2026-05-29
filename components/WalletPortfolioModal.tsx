@@ -371,7 +371,9 @@ export default function WalletPortfolioModal({ address, name, onClose }: Props) 
                               <div className="bg-slate-900/60 rounded-lg px-2 py-1.5">
                                 <div className="text-slate-500 mb-0.5">Bought</div>
                                 <div className="text-slate-200 font-medium">{fmtAmt(p.totalBought)}</div>
-                                {hasCost && <div className="text-slate-400">{fmtUsd(p.totalSpentUsd)}</div>}
+                                <div className="text-slate-400">
+                                  {hasCost ? fmtUsd(p.totalSpentUsd) : <span className="text-slate-600">cost unknown</span>}
+                                </div>
                               </div>
                               <div className="bg-slate-900/60 rounded-lg px-2 py-1.5">
                                 <div className="text-slate-500 mb-0.5">Sold</div>

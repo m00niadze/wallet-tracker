@@ -104,8 +104,10 @@ export interface ParsedTransaction {
   tokenMint: string;
   tokenAmount: number;
   spentSol: number | null;
-  spentStable: number | null;   // USDC, USDT, or any stablecoin amount
-  spentStableSymbol: string | null; // "USDC", "USDT", etc.
+  spentStable: number | null;
+  spentStableSymbol: string | null;
+  spentTokenMint: string | null;   // token-for-token swap: the token that was paid with
+  spentTokenAmount: number | null; // amount of that token spent
   dexSource: string;
   blockTime: number;
 }

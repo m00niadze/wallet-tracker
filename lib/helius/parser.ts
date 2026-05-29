@@ -126,6 +126,10 @@ function parseSwap(
   if (receivedAsset) {
     const [tokenMint, tokenAmount] = receivedAsset;
     const spentStableEntry = netSpent.find(([mint]) => isStable(mint));
+    // Token-for-token: paid with another non-stable token (not SOL, not stable)
+    const spentTokenEntry = !spentStableEntry && !solSpent
+      ? netSpent.find(([mint]) => !isStable(mint) && mint !== tokenMint)
+      : null;
     return {
       signature: tx.signature,
       walletAddress,
@@ -134,10 +138,11 @@ function parseSwap(
       txType: "SWAP",
       tokenMint,
       tokenAmount,
-      // If a stable was net-spent, SOL change is just fee routing — ignore it
-      spentSol: spentStableEntry ? null : solSpent,
+      spentSol: spentStableEntry || spentTokenEntry ? null : solSpent,
       spentStable: spentStableEntry ? -spentStableEntry[1] : null,
       spentStableSymbol: spentStableEntry ? (STABLE_SYMBOLS[spentStableEntry[0]] ?? null) : null,
+      spentTokenMint: spentTokenEntry ? spentTokenEntry[0] : null,
+      spentTokenAmount: spentTokenEntry ? -spentTokenEntry[1] : null,
       dexSource: tx.source ?? "UNKNOWN",
       blockTime: tx.timestamp,
     };
@@ -148,6 +153,10 @@ function parseSwap(
   if (sentAsset) {
     const [tokenMint, tokenAmount] = sentAsset;
     const receivedStableEntry = netReceived.find(([mint]) => isStable(mint));
+    // Token-for-token: received another non-stable token instead of SOL/stable
+    const receivedTokenEntry = !receivedStableEntry && !solReceived
+      ? netReceived.find(([mint]) => !isStable(mint) && mint !== tokenMint)
+      : null;
     return {
       signature: tx.signature,
       walletAddress,
@@ -156,9 +165,11 @@ function parseSwap(
       txType: "SWAP",
       tokenMint,
       tokenAmount: -tokenAmount,
-      spentSol: receivedStableEntry ? null : solReceived,
+      spentSol: receivedStableEntry || receivedTokenEntry ? null : solReceived,
       spentStable: receivedStableEntry ? receivedStableEntry[1] : null,
       spentStableSymbol: receivedStableEntry ? (STABLE_SYMBOLS[receivedStableEntry[0]] ?? null) : null,
+      spentTokenMint: receivedTokenEntry ? receivedTokenEntry[0] : null,
+      spentTokenAmount: receivedTokenEntry ? receivedTokenEntry[1] : null,
       dexSource: tx.source ?? "UNKNOWN",
       blockTime: tx.timestamp,
     };
@@ -189,6 +200,8 @@ function parseTransfer(
       spentSol: null,
       spentStable: null,
       spentStableSymbol: null,
+      spentTokenMint: null,
+      spentTokenAmount: null,
       dexSource: tx.source ?? "SYSTEM_PROGRAM",
       blockTime: tx.timestamp,
     };
@@ -209,6 +222,8 @@ function parseTransfer(
       spentSol: null,
       spentStable: null,
       spentStableSymbol: null,
+      spentTokenMint: null,
+      spentTokenAmount: null,
       dexSource: tx.source ?? "SYSTEM_PROGRAM",
       blockTime: tx.timestamp,
     };
@@ -228,6 +243,8 @@ function parseTransfer(
       spentSol: solSent,
       spentStable: null,
       spentStableSymbol: null,
+      spentTokenMint: null,
+      spentTokenAmount: null,
       dexSource: tx.source ?? "SYSTEM_PROGRAM",
       blockTime: tx.timestamp,
     };
@@ -245,6 +262,8 @@ function parseTransfer(
       spentSol: null,
       spentStable: null,
       spentStableSymbol: null,
+      spentTokenMint: null,
+      spentTokenAmount: null,
       dexSource: tx.source ?? "SYSTEM_PROGRAM",
       blockTime: tx.timestamp,
     };

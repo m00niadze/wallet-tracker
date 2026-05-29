@@ -208,8 +208,9 @@ export async function GET(
       const amount = t.uiAmount;
       if (amount < 0.0001) return null;
       const price = priceMap.get(t.mint);
-      const dbData = mintStats.get(t.mint);
       const currentPrice = price?.priceUsd ?? 0;
+      if (amount * currentPrice < 1) return null; // filter dust / scam tokens under $1
+      const dbData = mintStats.get(t.mint);
       const currentValue = amount * currentPrice;
       const totalSpentUsd = dbData?.totalSpentUsd ?? 0;
       const totalReceivedUsd = dbData?.totalReceivedUsd ?? 0;

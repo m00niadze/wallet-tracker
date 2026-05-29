@@ -62,6 +62,7 @@ export default function TransactionCard({ tx, onWalletClick }: Props) {
     const usd = tx.spentUsdValue != null ? ` (~$${tx.spentUsdValue.toFixed(0)})` : "";
     if (tx.spentSol != null) return { amount: `${tx.spentSol.toFixed(4)}`, currency: "SOL", usd };
     if (tx.spentStable != null) return { amount: `${tx.spentStable.toFixed(2)}`, currency: tx.spentStableSymbol ?? "stable", usd: "" };
+    if (tx.spentUsdValue != null) return { amount: `~$${tx.spentUsdValue.toFixed(0)}`, currency: "token swap", usd: "" };
     return null;
   })();
 

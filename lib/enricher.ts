@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { ParsedTransaction, StoredTransaction } from "./helius/types";
+import { getHistoricalPrice } from "./birdeye";
 
 interface DexPair {
   chainId: string;
@@ -51,12 +52,25 @@ export async function enrichTransaction(
   const priceUsd = dex ? parseFloat(dex.priceUsd) : null;
   const marketCap = dex?.marketCap ?? dex?.fdv ?? null;
 
-  const spentUsdValue =
+  let spentUsdValue: number | null =
     parsed.spentSol != null
       ? parsed.spentSol * solPriceUsd
       : parsed.spentStable != null
       ? parsed.spentStable
       : null;
+
+  // Token-for-token swap: get the historical price of the spent token at tx time
+  if (spentUsdValue == null && parsed.spentTokenMint && parsed.spentTokenAmount) {
+    const historicalPrice = await getHistoricalPrice(parsed.spentTokenMint, parsed.blockTime);
+    if (historicalPrice != null) {
+      spentUsdValue = parsed.spentTokenAmount * historicalPrice;
+    } else {
+      // Birdeye unavailable — fall back to current DexScreener price
+      const spentDex = await fetchDexScreenerData(parsed.spentTokenMint);
+      const spentPrice = spentDex ? parseFloat(spentDex.priceUsd) : null;
+      if (spentPrice) spentUsdValue = parsed.spentTokenAmount * spentPrice;
+    }
+  }
 
   return {
     signature: parsed.signature,
